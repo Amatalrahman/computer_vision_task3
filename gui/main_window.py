@@ -27,12 +27,6 @@ ROOT = Path(__file__).resolve().parents[1]
 SAMPLES = ROOT / "samples"
 IMAGE_FILTER = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.tiff *.pgm *.ppm *.webp)"
 
-HARRIS_TEXT = ("Corners from the structure tensor M:  R = det(M) − k·trace(M)². "
-               "Pipeline: grayscale → Gaussian blur → Sobel Ix, Iy → M → R → threshold → NMS.")
-LAMBDA_TEXT = ("Shi–Tomasi criterion: response = λ−, the smaller eigenvalue of M, from the closed form "
-               "λ± = (a+c)/2 ± √(((a−c)/2)² + b²). Reuses Member 1's gradients, tensor and NMS.")
-
-
 class MainWindow(QMainWindow):
     busy_changed = Signal(bool)
 
@@ -54,8 +48,8 @@ class MainWindow(QMainWindow):
     # ================================================================== UI
     def _build_tabs(self) -> None:
         self.detector_tabs = {
-            "Harris": DetectorTab(self, "Harris", "Harris Corner Detector", "Member 1", HARRIS_TEXT, GREEN),
-            "Lambda-": DetectorTab(self, "Lambda-", "λ− Feature Detector", "Member 2", LAMBDA_TEXT, CYAN),
+            "Harris": DetectorTab(self, "Harris", "Harris Corner Detector", GREEN),
+            "Lambda-": DetectorTab(self, "Lambda-", "λ− Feature Detector", CYAN),
         }
         self.sift_tab = SiftTab(self)
         self.match_tab = MatchingTab(self)
@@ -287,8 +281,6 @@ class MainWindow(QMainWindow):
     def about(self) -> None:
         QMessageBox.about(self, APP_NAME, (
             f"<b>{APP_NAME}</b><br>Feature detection, description and matching — implemented from scratch."
-            "<br><br>1 · Harris corners (Member 1)<br>2 · λ− detector (Member 2)"
-            "<br>3 · SIFT descriptors (Member 3)<br>4 · SSD / NCC matching (Member 4)"
             "<br><br>Images larger than 1600 px are resized on load for speed."))
 
     def warn(self, text: str) -> None:

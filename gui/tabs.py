@@ -28,8 +28,6 @@ from .widgets import ImageView, ParamForm, Segmented, StatRow, primary_button, t
 # =====================================================================================
 class StepTab(QWidget):
     TITLE = ""
-    OWNER = ""
-    DESCRIPTION = ""
     STATS: list[str] = []
 
     def __init__(self, app) -> None:
@@ -49,13 +47,7 @@ class StepTab(QWidget):
         side_lay.setContentsMargins(16, 16, 16, 16)
         title = QLabel(self.TITLE)
         title.setObjectName("title")
-        owner = QLabel(self.OWNER)
-        owner.setObjectName("owner")
-        desc = QLabel(self.DESCRIPTION)
-        desc.setObjectName("muted")
-        desc.setWordWrap(True)
-        for w in (title, owner, desc):
-            side_lay.addWidget(w)
+        side_lay.addWidget(title)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -109,12 +101,12 @@ class StepTab(QWidget):
 
 # =====================================================================================
 class DetectorTab(StepTab):
-    """Shared by Harris (Member 1) and Lambda-minus (Member 2)."""
+    """Shared detector tab for Harris and Lambda-minus."""
     STATS = ["Keypoints", "Gradients", "Structure tensor", "Response", "Threshold + NMS", "Total"]
 
-    def __init__(self, app, detector: str, title: str, owner: str, description: str, color) -> None:
+    def __init__(self, app, detector: str, title: str, color) -> None:
         self.detector, self.color = detector, color
-        self.TITLE, self.OWNER, self.DESCRIPTION = title, owner, description
+        self.TITLE = title
         super().__init__(app)
 
     def build(self) -> None:
@@ -173,10 +165,6 @@ class DetectorTab(StepTab):
 # =====================================================================================
 class SiftTab(StepTab):
     TITLE = "SIFT Descriptors"
-    OWNER = "Member 3"
-    DESCRIPTION = ("128-D descriptor per keypoint: dominant orientation → rotated 16×16 patch → "
-                   "4×4 cells × 8-bin histograms → normalise, clip 0.2, re-normalise. "
-                   "Reuses the gradients already computed for detection.")
     STATS = ["Descriptors", "Dimension", "Orientation", "Descriptor", "Total"]
 
     def build(self) -> None:
@@ -276,10 +264,6 @@ class SiftTab(StepTab):
 # =====================================================================================
 class MatchingTab(StepTab):
     TITLE = "Feature Matching"
-    OWNER = "Member 4"
-    DESCRIPTION = ("Compares every SIFT descriptor of image A with every one of image B in a single "
-                   "matrix product. SSD = lowest distance + Lowe ratio test; NCC = highest correlation "
-                   "+ minimum threshold. Optional cross-check keeps mutual best matches only.")
     STATS = ["Descriptors A", "Descriptors B", "SSD matches", "SSD time", "NCC matches", "NCC time"]
 
     def build(self) -> None:
