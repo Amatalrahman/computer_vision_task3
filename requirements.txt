@@ -1,0 +1,9 @@
+# Feature Lab — Python 3.10+
+numpy>=1.24
+# "headless" build avoids a Qt plugin clash with PySide6 (OpenCV is only used for
+# file I/O, convolution and drawing — all algorithms are implemented by us).
+opencv-python-headless>=4.8
+PySide6>=6.5
+
+# optional, only to run the automated check in tests/
+pytest>=7.0

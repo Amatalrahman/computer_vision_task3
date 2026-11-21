@@ -1,0 +1,57 @@
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python build and cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+
+# Type checker and lint caches
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.hypothesis/
+
+# Generated application output
+timings.csv
+result.png
+result.jpg
+result.jpeg
+
+# Local environment and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Editors and operating systems
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
