@@ -25,6 +25,7 @@ SOBEL_X = np.array([[-1, 0, 1],
                     [-1, 0, 1]], dtype=np.float32)
 SOBEL_Y = SOBEL_X.T.copy()
 
+#check
 _BORDER = cv2.BORDER_REFLECT_101
 
 
@@ -35,7 +36,7 @@ def gaussian_kernel_1d(sigma: float) -> np.ndarray:
     k = np.exp(-(x * x) / (2.0 * sigma * sigma))
     return k / k.sum()
 
-
+#check
 def gaussian_blur(img: np.ndarray, sigma: float) -> np.ndarray:
     """Separable Gaussian smoothing (our kernel, OpenCV only does the convolution)."""
     if sigma <= 0:
@@ -43,7 +44,7 @@ def gaussian_blur(img: np.ndarray, sigma: float) -> np.ndarray:
     k = gaussian_kernel_1d(sigma)
     return cv2.sepFilter2D(img, cv2.CV_32F, k, k, borderType=_BORDER)
 
-
+#check
 def convolve(img: np.ndarray, kernel: np.ndarray) -> np.ndarray:
     return cv2.filter2D(img, cv2.CV_32F, kernel, borderType=_BORDER)
 

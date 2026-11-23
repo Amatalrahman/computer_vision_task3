@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (QDockWidget, QFileDialog, QHBoxLayout, QLabel, QL
 
 from features import FeatureProject
 from features.detectors import DETECTORS
-from features.visualization import CYAN, GREEN
+from features.visualization import CYAN, GREEN, ORANGE
 
 from .tabs import DetectorTab, MatchingTab, ReportTab, SiftTab
 from .widgets import to_qimage
@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         self.project = FeatureProject(max_side=1600)
         self.pool = QThreadPool.globalInstance()
         self._task = None
-        self.setWindowTitle(f"{APP_NAME} — Harris · λ− · SIFT · SSD / NCC")
+        self.setWindowTitle(f"{APP_NAME} — Harris · λ− · DoG · SIFT · SSD / NCC")
         self.resize(1480, 900)
         self.setAcceptDrops(True)
 
@@ -50,17 +50,21 @@ class MainWindow(QMainWindow):
         self.detector_tabs = {
             "Harris": DetectorTab(self, "Harris", "Harris Corner Detector", GREEN),
             "Lambda-": DetectorTab(self, "Lambda-", "λ− Feature Detector", CYAN),
+            "DoG": DetectorTab(self, "DoG", "DoG Scale-space Detector", ORANGE),
         }
         self.sift_tab = SiftTab(self)
         self.match_tab = MatchingTab(self)
+        self.sift_tab.source.currentTextChanged.connect(self.match_tab.source.setCurrentText)
+        self.match_tab.source.currentTextChanged.connect(self.sift_tab.source.setCurrentText)
         self.report_tab = ReportTab(self)
 
         self.tabs = QTabWidget()
         self.tabs.setDocumentMode(True)
         self.tabs.addTab(self.detector_tabs["Harris"], "1 · Harris")
         self.tabs.addTab(self.detector_tabs["Lambda-"], "2 · λ−")
-        self.tabs.addTab(self.sift_tab, "3 · SIFT")
-        self.tabs.addTab(self.match_tab, "4 · Matching")
+        self.tabs.addTab(self.detector_tabs["DoG"], "3 · DoG")
+        self.tabs.addTab(self.sift_tab, "4 · SIFT")
+        self.tabs.addTab(self.match_tab, "5 · Matching")
         self.tabs.addTab(self.report_tab, "Report")
         self.tabs.currentChanged.connect(lambda _: self.current_tab().refresh())
         central = QWidget()

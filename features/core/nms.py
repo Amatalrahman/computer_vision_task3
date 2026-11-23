@@ -24,7 +24,7 @@ def threshold_mask(response: np.ndarray, ratio: float) -> np.ndarray:
         return np.zeros(response.shape, dtype=bool)
     return response > ratio * peak
 
-
+#check
 def local_maxima_mask(response: np.ndarray, size: int) -> np.ndarray:
     size = max(3, int(size) | 1)                      # odd window >= 3
     kernel = np.ones((size, size), np.uint8)

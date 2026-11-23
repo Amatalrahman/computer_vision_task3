@@ -107,6 +107,8 @@ class DetectorTab(StepTab):
     def __init__(self, app, detector: str, title: str, color) -> None:
         self.detector, self.color = detector, color
         self.TITLE = title
+        if detector == "DoG":
+            self.STATS = ["Keypoints", "Scale-space", "Extrema", "Total"]
         super().__init__(app)
 
     def build(self) -> None:
@@ -151,9 +153,13 @@ class DetectorTab(StepTab):
             self.stats.reset()
             self.view.show_array(ctx.image.rgb)
             return
-        self.stats.set(**{"Keypoints": len(r.keypoints), "Gradients": r.gradients_ms,
-                          "Structure tensor": r.tensor_ms, "Response": r.response_ms,
-                          "Threshold + NMS": r.nms_ms, "Total": r.total_ms})
+        if self.detector == "DoG":
+            self.stats.set(**{"Keypoints": len(r.keypoints), "Scale-space": r.gradients_ms,
+                              "Extrema": r.response_ms, "Total": r.total_ms})
+        else:
+            self.stats.set(**{"Keypoints": len(r.keypoints), "Gradients": r.gradients_ms,
+                              "Structure tensor": r.tensor_ms, "Response": r.response_ms,
+                              "Threshold + NMS": r.nms_ms, "Total": r.total_ms})
         if mode == "Response map":
             self.view.show_array(response_heatmap(r.response))
         elif mode == "Original":
@@ -276,7 +282,7 @@ class MatchingTab(StepTab):
             c.currentIndexChanged.connect(lambda _: self.refresh())
         pl.addRow("Image A", self.combo_a)
         pl.addRow("Image B", self.combo_b)
-        pl.addRow("Keypoints", self.source)
+        pl.addRow("SIFT descriptors from", self.source)
         self.add_group("Image pair", pick)
 
         self.forms = {name: ParamForm(cls.params_cls) for name, cls in MATCHERS.items()}

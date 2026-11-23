@@ -69,28 +69,48 @@ class SIFTDescriptor:
 
     # ================================================================ public
     def compute(self, ctx: ImageContext, detection: DetectionResult) -> DescriptorResult:
-        grads = ctx.gradients(detection.params.pre_sigma)          # shared, cached
         kps = detection.keypoints
         n = len(kps)
+        pre_sigma = float(getattr(detection.params, "pre_sigma", 1.0))
+        grads = ctx.gradients(pre_sigma)                           # shared, cached
         if n == 0:
             return DescriptorResult(detection.detector, self.params, kps,
                                     np.zeros((0, self.DIM), np.float32), 0.0, 0.0)
 
-        half = self.params.patch_size / 2.0
-        desc_radius = int(np.ceil(half * np.sqrt(2))) + 1     # rotated patch fits inside
-        ori_radius = int(np.ceil(half))
-        pad = max(desc_radius, ori_radius)
-        mag = np.pad(grads.magnitude, pad)                    # zero padding at borders
-        ori = np.pad(grads.orientation, pad)
-        centers = np.round(kps.xy).astype(np.int64) + pad
+        if kps.scales is None:
+            scale_groups = [(np.arange(n), self.params.patch_size / 2.0)]
+        else:
+            scale_groups = []
+            # Keep the effective support bounded for unusually large DoG scales.
+            max_scale_factor = 3.0
+            for scale in np.unique(kps.scales):
+                indices = np.flatnonzero(kps.scales == scale)
+                factor = min(float(scale) / max(pre_sigma, 1e-6), max_scale_factor)
+                scale_groups.append((indices, self.params.patch_size / 2.0 * factor))
+
+        theta = np.zeros(n, np.float32)
+        desc = np.zeros((n, self.DIM), np.float32)
 
         with Timer() as t_ori:
-            if self.params.rotation_invariant:
-                theta = self._dominant_orientations(mag, ori, centers, ori_radius)
-            else:
-                theta = np.zeros(n, np.float32)
+            for indices, half in scale_groups:
+                desc_radius = int(np.ceil(half * np.sqrt(2))) + 1
+                ori_radius = int(np.ceil(half))
+                pad = max(desc_radius, ori_radius)
+                mag = np.pad(grads.magnitude, pad)
+                ori = np.pad(grads.orientation, pad)
+                centers = np.round(kps.xy[indices]).astype(np.int64) + pad
+                if self.params.rotation_invariant:
+                    theta[indices] = self._dominant_orientations(mag, ori, centers, ori_radius)
+
         with Timer() as t_desc:
-            desc = self._descriptors(mag, ori, centers, theta, desc_radius, half)
+            for indices, half in scale_groups:
+                desc_radius = int(np.ceil(half * np.sqrt(2))) + 1
+                pad = desc_radius
+                mag = np.pad(grads.magnitude, pad)
+                ori = np.pad(grads.orientation, pad)
+                centers = np.round(kps.xy[indices]).astype(np.int64) + pad
+                desc[indices] = self._descriptors(
+                    mag, ori, centers, theta[indices], desc_radius, half)
 
         return DescriptorResult(detection.detector, self.params, kps.with_orientations(theta),
                                 desc, t_ori.ms, t_desc.ms)
